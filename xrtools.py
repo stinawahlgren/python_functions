@@ -2,7 +2,7 @@ import xarray as xr
 import numpy as np
 from scipy.stats import binned_statistic
 
-from misc import get_edges
+from .misc import get_edges
 
 def has_same_coords(da1, da2):
     """

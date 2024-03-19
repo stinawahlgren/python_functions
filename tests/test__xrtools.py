@@ -1,4 +1,4 @@
-from xrtools import has_same_coords, da_from_binned_statistic_1d
+from ..xrtools import has_same_coords, da_from_binned_statistic_1d
 
 import xarray as xr
 import numpy as np

@@ -7,7 +7,7 @@ from matplotlib import colors
 import cmocean.cm as cmo
 from matplotlib.dates import DateFormatter, DayLocator, HourLocator
 
-from misc import get_edges
+from .misc import get_edges
 
 def pcolormesh_offset(x,y,z,y_offset, x_pixel_scale = None, vmin = None, vmax = None, **kwargs):
     """
