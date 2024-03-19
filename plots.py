@@ -7,6 +7,8 @@ from matplotlib import colors
 import cmocean.cm as cmo
 from matplotlib.dates import DateFormatter, DayLocator, HourLocator
 
+from misc import get_edges
+
 def pcolormesh_offset(x,y,z,y_offset, x_pixel_scale = None, vmin = None, vmax = None, **kwargs):
     """
     Example:
@@ -40,8 +42,8 @@ def pcolormesh_offset(x,y,z,y_offset, x_pixel_scale = None, vmin = None, vmax = 
     y_offset[nan_offset] = 0
     z[:,nan_offset] = np.nan
         
-    x_edges = _get_edges(x)
-    y_edges = _get_edges(y)
+    x_edges = get_edges(x)
+    y_edges = get_edges(y)
                              
     for i in range(Nx):
         if x_pixel_scale is None:
@@ -79,7 +81,7 @@ def pcolormesh_nongridded_y(x,y,z, x_pixel_scale = None, vmin = None, vmax = Non
     if vmax is None:
         vmax = np.nanmax(z)
         
-    x_edges = _get_edges(x)
+    x_edges = get_edges(x)
                              
     for i in range(Nx):
         if x_pixel_scale is None:
@@ -88,7 +90,7 @@ def pcolormesh_nongridded_y(x,y,z, x_pixel_scale = None, vmin = None, vmax = Non
             x_center = (x_edges[i]+x_edges[i+1])/2
             x_edge   = np.array([-0.5,0.5])* x_pixel_scale * x_step + x_center
         
-        y_edges = _get_edges(y[:,i])
+        y_edges = get_edges(y[:,i])
 
         plt.pcolormesh(x_edge, y_edges, z[:,i:i+1], vmin=vmin, vmax=vmax, **kwargs)
       
@@ -103,13 +105,6 @@ def nice_time_axis(ax=None):
     ax.xaxis.set_major_formatter(DateFormatter("%Y %b %d"))
     ax.xaxis.set_minor_formatter(DateFormatter("%H:%M"))
     ax.get_xaxis().set_tick_params(which='major', pad=10)
-
-def _get_edges(centers):
-    centers = np.array(centers)
-    mid = centers[:-1] + (centers[1:]-centers[:-1])/2
-    first = centers[0] - (centers[1]-centers[0])/2
-    last  = centers[-1] + (centers[-1]-centers[-2])/2
-    return np.concatenate([[first], mid, [last]])
 
 def plot_twodstat(xbins,ybins,x,y,z=False,statistic="count",tickstep=False,axlines=(0,0),cmap = cmo.tempo, vmin=None, vmax=None, colorbar=True,meandot=True,meanline=False,axisequal=False, cbar_shrink = 1, norm=None):
     """
