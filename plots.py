@@ -106,17 +106,17 @@ def nice_time_axis(ax=None):
     ax.xaxis.set_minor_formatter(DateFormatter("%H:%M"))
     ax.get_xaxis().set_tick_params(which='major', pad=10)
 
-def plot_twodstat(xbins,ybins,x,y,z=False,statistic="count",tickstep=False,axlines=(0,0),cmap = cmo.tempo, vmin=None, vmax=None, colorbar=True,meandot=True,meanline=False,axisequal=False, cbar_shrink = 1, norm=None):
+def plot_twodstat(x,y,xbins=50,ybins=50,z=False,statistic="count",tickstep=False,axlines=(0,0),cmap = cmo.tempo, vmin=None, vmax=None, colorbar=True,meandot=True,meanline=False,axisequal=False, cbar_shrink = 1, norm=None):
     """
     Compute and plot two a dimensional statistic. Copied from http://www.jmlilly.net/course/labs/html/VarianceEllipses-Python.html
     
     Args: 
-        xbins: Array of bin edges for x-bins
-        ybins: Array of bin edges for y-bins
         x: Array of x-values to be binned
         y: Array of y-values to be binned; same size as x
         
     Optional Args:
+        xbins: Number of bins or array of bin edges for x-bins (default: 50)
+        ybins: Number of bins or array of bin edges for y-bins (default: 50)
         z: Array of z-values for which statistic is be formed; same size as x 
         statistic: "count", "log10count", "mean", "median", or "std";
             defaults to "count", in which case the z argument is not needed
@@ -142,10 +142,20 @@ def plot_twodstat(xbins,ybins,x,y,z=False,statistic="count",tickstep=False,axlin
     deviation the square root of <(z - <z>)(z - <z>)^*> = <|z|^2> - |<z>|^2,
     which will be real-valued and non-negative. 
     """
+    valid_statistic = ["count", "log10count", "mean", "median", "std"]
+    if statistic not in valid_statistic:
+        raise ValueError(f"statistic must be one of {valid_statistic}")
+
     if norm == 'log':
         norm = colors.LogNorm()
+
+    if isinstance(xbins, int):
+        xbins = np.linspace(np.nanmin(x), np.nanmax(x), xbins+1)
+        
+    if isinstance(ybins, int):
+        ybins = np.linspace(np.nanmin(y), np.nanmax(y), ybins+1)
     
-    #plot just one twodhist
+    #plot just one twodhist    
     if statistic=="count":
         q = stats.binned_statistic_2d(x, y, None, bins=[xbins, ybins], statistic="count").statistic
         q[q==0]=np.nan  #swap zero values for NaNs, so they don't appear with a color
