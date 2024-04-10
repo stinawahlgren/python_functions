@@ -106,7 +106,7 @@ def nice_time_axis(ax=None):
     ax.xaxis.set_minor_formatter(DateFormatter("%H:%M"))
     ax.get_xaxis().set_tick_params(which='major', pad=10)
 
-def plot_twodstat(x,y,xbins=50,ybins=50,z=False,statistic="count",tickstep=False,axlines=(0,0),cmap = cmo.tempo, vmin=None, vmax=None, colorbar=True,meandot=True,meanline=False,axisequal=False, cbar_shrink = 1, norm=None):
+def plot_twodstat(x,y,xbins=50,ybins=50,z=False,statistic="count",tickstep=False,axlines=(0,0),cmap = cmo.tempo, vmin=None, vmax=None, colorbar=True,meandot=True,meanline=False,axisequal=False, cbar_shrink = 1, norm=None, ax=None):
     """
     Compute and plot two a dimensional statistic. Copied from http://www.jmlilly.net/course/labs/html/VarianceEllipses-Python.html
     
@@ -187,7 +187,8 @@ def plot_twodstat(x,y,xbins=50,ybins=50,z=False,statistic="count",tickstep=False
 
         clabel='Standard Deviation'
 
-    ax=plt.gca()
+    if ax is None:
+        ax=plt.gca()
     
     im=ax.pcolormesh(xbins, ybins, np.transpose(q), cmap=cmap, shading="flat", vmin=vmin, vmax=vmax, norm=norm)
     if colorbar:
