@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 from scipy.stats import binned_statistic
+from matplotlib.pyplot import subplots
 
 from .misc import get_edges
 
@@ -127,3 +128,109 @@ def get_binned_statistics(da_x, da_y, x_grid, statistic):
     # Compute statistics
     bin_edges = get_edges(x_grid.values)  
     return binned_statistic(x, y, statistic = statistic, bins = bin_edges)
+
+
+def violin_plot(da, dim, ax=None, plot_hist = True, xlabel=None, ylabel=None, hist_kwargs={}, **kwargs):
+    """
+    Visualize data from a dataarry with violins plots along the given dimension.
+    
+    Note: Keywords showextrema/showmedians/showmeans are useful for controlling the appearance of the violins
+    
+    Parameters:
+        da  : xarray.DataArray with data
+        dim : Dimension to keep (x-axis). All other dimensions will be collapsed
+              into a single dimension representing observations.
+        plot_hist : True/False. Plot histogram (default True)
+        ax  :  If plot_count is True, ax should be a list of 2 axes   
+        xlabel : Optional xlabel (default: dim)
+        ylabel : Optional y_label (default: none)
+        hist_kwargs : (dict) Keyword arguments passed to matplotlib.pyplot.bar 
+                      (used for plotting histogram if plot_hist is True)
+        **kwargs : Passed to matplotlib.pyplot.violinplot.
+        
+    Returns (ax, violins) where violins is the handle from matplotlib.pyplot.violinplot.
+    """
+
+    if ax is None:
+        if plot_hist:            
+            fig,ax = subplots(nrows=2, sharex=True, layout='tight', height_ratios=[3,1])
+        else:
+            fig,ax = subplots()
+            
+    if xlabel is None:
+        xlabel = dim 
+        
+    # Collapse dimensions
+    collapse_dims = []
+    for d in da.dims:
+        if d != dim:
+            collapse_dims.append(d)
+    collapsed_data = da.stack({'observations' : collapse_dims})
+
+    # Remove nans and make data to the form violinplot eats
+    N = len(da[dim])
+    data = [[] for i in range(N)] 
+    count = [0 for i in range(N)]
+
+    for i in range(N):
+        obs      = collapsed_data.isel({dim : i}).values
+        data[i]  = obs[~np.isnan(obs)]
+        count[i] = len(data[i]) 
+    
+    ## Plot violins
+    if plot_hist:
+        ax_violin = ax[0]
+    else:
+        ax_violin = ax
+    
+    # Keyword arguments to viloinplot:
+    widths = 0.8*np.mean(np.diff(da[dim].values))
+    default_kwargs = {'showmedians' : True,
+                      'showmeans' : True,
+                      'positions' : da[dim].values,
+                      'widths'    : 0.8*np.mean(np.diff(da[dim].values))}
+    
+    # Overwrite with user defined keyword arguments
+    kwargs_all = {**default_kwargs, **kwargs}
+
+    violins = ax_violin.violinplot(data, **kwargs_all)
+    
+    # Make nicer
+    if 'cmedians' in violins.keys():
+        violins['cmedians'].set_label('median')
+        violins['cmedians'].set_color('steelblue')
+        
+    if 'cmeans' in violins.keys():
+        violins['cmeans'].set_label('mean')
+        violins['cmeans'].set_color('black')
+        violins['cmeans'].set_linestyle('dotted')
+        
+    if 'cbars' in violins.keys():
+        violins['cbars'].set_label('extent')
+        violins['cbars'].set_color('silver')
+        violins['cbars'].set_linewidth(0.5)
+        violins['cbars'].set_zorder(-10)
+        violins['cmaxes'].set_visible(False)
+        violins['cmins'].set_visible(False)
+        
+    ax_violin.legend()
+       
+    ## Plot histogram
+    if plot_hist:
+        default_hist_kwargs = {'width' : widths,
+                               'alpha' : 0.4}
+        hist_kwargs_all = {**default_hist_kwargs, **hist_kwargs}
+        ax_hist = ax[1]
+        ax_hist.bar(da[dim].values, count, **hist_kwargs_all)    
+    
+    ## Label axes
+    ax_violin.set_ylabel(ylabel)
+    
+    if plot_hist:
+        ax_hist.set_ylabel('count')
+        ax_hist.set_xlabel(xlabel)
+    else:
+        ax_violin.set_xlabel(xlabel)
+
+    return ax, violins
+
