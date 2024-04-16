@@ -5,7 +5,8 @@ from scipy import stats    #Used for 2D binned statistics
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import cmocean.cm as cmo
-from matplotlib.dates import DateFormatter, DayLocator, HourLocator
+from matplotlib.dates import DateFormatter, DayLocator, HourLocator, date2num
+from matplotlib.patches import Rectangle
 
 from .misc import get_edges
 
@@ -242,3 +243,45 @@ def xr_plot_hist_with_mean_and_std(da, ax=None, **kwargs):
     ax.text(0.05, 0.95, textstr, transform=ax.transAxes,# fontsize=14,
             verticalalignment='top')    
     return
+
+def mark_time_range(time_range, axis='x', ax = None, color = 'lavender', zorder=-2,  **kwargs):
+    # Based on https://stackoverflow.com/a/31163913/11028793
+
+    start = date2num(time_range[0])
+    end = date2num(time_range[1])
+
+    mark_range((start, end), axis=axis, ax=ax, color=color, zorder=zorder, **kwargs)
+
+    return
+
+def mark_range(range, axis='x', ax=None, color='lavender', zorder=-2, **kwargs):
+    """
+    Marks the given range in a plot with a rectangle.
+    
+    Example:
+        mark_range((1,2), axis='y')
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    if axis == 'x':      
+        ylim = ax.get_ylim()
+        width = range[1]-range[0]
+        height = ylim[1]-ylim[0]
+        lower_left_corner = (range[0], ylim[0])
+    elif axis == 'y':
+        xlim = ax.get_xlim()
+        width = xlim[1]-xlim[0]
+        height = range[1]-range[0]
+        lower_left_corner = (xlim[0], range[0])
+    else:
+        raise ValueError("axis must be 'x' or 'y'")
+
+    # Plot rectangle
+    rect = Rectangle(lower_left_corner, width, height, zorder=zorder, color=color, **kwargs)
+    ax.add_patch(rect)
+
+    return
+    
+    
+    
