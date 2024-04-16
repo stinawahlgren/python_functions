@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 from scipy.stats import binned_statistic
+from scipy.ndimage import median_filter
 from matplotlib.pyplot import subplots
 
 from .misc import get_edges
@@ -234,3 +235,27 @@ def violin_plot(da, dim, ax=None, plot_hist = True, xlabel=None, ylabel=None, hi
 
     return ax, violins
 
+def apply_median_filter(da, filter_lengths, filter_dims):
+    """
+    Apply median filter on data array. Wrapper for scipy.nd_image.median_filter
+    
+    Parameters:
+        da : xarray.DataArray with data to be filtered
+        filter_length : length of median filter to be used.
+        filter_dim : The filter will be applied along this dimension in da
+        
+    Returns a new xr.DataArray with filtered data.
+    """
+    
+    # Expand kernel to same dimensions as da
+    kernel_size = [1 for dim in da.dims]
+    for (i,dim) in enumerate(da.dims):
+        for (N, fdim) in zip(filter_lengths, filter_dims):
+            if dim == fdim:
+                kernel_size[i] = N
+    
+    # Create DataArray with filtered data
+    filtered_da = da.copy()
+    filtered_da.data = median_filter(da, kernel_size, mode='reflect')
+    
+    return filtered_da
