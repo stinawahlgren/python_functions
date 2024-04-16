@@ -166,10 +166,10 @@ def violin_plot(da, dim, ax=None, plot_hist = True, xlabel=None, ylabel=None, hi
     for d in da.dims:
         if d != dim:
             collapse_dims.append(d)
-    collapsed_data = da.stack({'observations' : collapse_dims})
+    collapsed_data = da.stack({'observations' : collapse_dims}).dropna(dim=dim, how='all')
 
     # Remove nans and make data to the form violinplot eats
-    N = len(da[dim])
+    N = len(collapsed_data[dim])
     data = [[] for i in range(N)] 
     count = [0 for i in range(N)]
 
@@ -188,8 +188,8 @@ def violin_plot(da, dim, ax=None, plot_hist = True, xlabel=None, ylabel=None, hi
     widths = 0.8*np.mean(np.diff(da[dim].values))
     default_kwargs = {'showmedians' : True,
                       'showmeans' : True,
-                      'positions' : da[dim].values,
-                      'widths'    : 0.8*np.mean(np.diff(da[dim].values))}
+                      'positions' : collapsed_data[dim].values,
+                      'widths'    : widths}
     
     # Overwrite with user defined keyword arguments
     kwargs_all = {**default_kwargs, **kwargs}
@@ -222,7 +222,7 @@ def violin_plot(da, dim, ax=None, plot_hist = True, xlabel=None, ylabel=None, hi
                                'alpha' : 0.4}
         hist_kwargs_all = {**default_hist_kwargs, **hist_kwargs}
         ax_hist = ax[1]
-        ax_hist.bar(da[dim].values, count, **hist_kwargs_all)    
+        ax_hist.bar(collapsed_data[dim].values, count, **hist_kwargs_all)    
     
     ## Label axes
     ax_violin.set_ylabel(ylabel)
