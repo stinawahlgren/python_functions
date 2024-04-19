@@ -237,14 +237,18 @@ def violin_plot(da, dim, ax=None, plot_hist = True, xlabel=None, ylabel=None, hi
 
 def apply_median_filter(da, filter_lengths, filter_dims):
     """
-    Apply median filter on data array. Wrapper for scipy.nd_image.median_filter
+    Apply median filter on data array using scipy.nd_image.median_filter
     
     Parameters:
         da : xarray.DataArray with data to be filtered
-        filter_length : length of median filter to be used.
-        filter_dim : The filter will be applied along this dimension in da
+        filter_length : Size of median filter to be used.
+        filter_dim : Corresponding dimensions. The filter will be applied along those dimensions in da 
         
     Returns a new xr.DataArray with filtered data.
+
+    Example:
+    apply_median_filter(da, [9], ['time'])
+    apply_median_filter(da, [9,21], ['time', 'range'])
     """
     
     # Expand kernel to same dimensions as da
