@@ -27,12 +27,13 @@ def has_same_coords(da1, da2):
     return output
 
 
-def grid_data_1d(da_x, da_y, x_grid, label = None):
+def grid_data_1d(da_x, da_y, x_grid, label = None, statistics = ['mean', 'count', 'std']):
     """
     Grid data using scipy.stats.binned_statistic.
     da_x, da_y and x_grid should all be xarray data arrays
     
-    Returns an xarray dataset with mean, count and standard deviation for grid cells. 
+    Returns an xarray dataset with statistics for grid cells. Default statistics are  mean, 
+    count and standard deviation, but this can be altered by input variable statistics.
     If label is given, the variables will be called <label>_mean, <label>_count, <label>_std 
     """     
 
@@ -41,15 +42,14 @@ def grid_data_1d(da_x, da_y, x_grid, label = None):
     else:
         prefix = f"{label}_"
  
-    # Compute statistics   
-    mean  = da_from_binned_statistic_1d(da_x, da_y, x_grid, 'mean'
-                                        ).to_dataset(name = prefix + 'mean')
-    count = da_from_binned_statistic_1d(da_x, da_y, x_grid, 'count'
-                                        ).to_dataset(name = prefix + 'count')
-    std   = da_from_binned_statistic_1d(da_x, da_y, x_grid, 'std'
-                                        ).to_dataset(name = prefix + 'std')
+    # Compute statistics
+    ds_list = []
+    for stat in statistics:
+        ds_list.append(da_from_binned_statistic_1d(da_x, da_y, x_grid, stat
+                                                   ).to_dataset(name = prefix + stat)
+                       )
 
-    return mean.merge(std).merge(count)
+    return xr.merge(ds_list)
 
 
 def da_from_binned_statistic_1d(da_x, da_y, x_grid, statistic):
