@@ -41,9 +41,11 @@ def test__has_same_coords():
 
 def test__da_from_binned_statistics_1d():
     
-    x = np.linspace(-1,1,10)
-    y = np.array([0.08026983, 0.12812636, 0.12214241, 0.22667363, 0.14381985,
-       0.35799247, 0.03849258, 0.63907954, 0.47213111, 0.89872314])
+    x = xr.DataArray( np.linspace(-1,1,10), dims='time')
+    y = xr.DataArray(
+        np.array([0.08026983, 0.12812636, 0.12214241, 0.22667363, 0.14381985,
+                  0.35799247, 0.03849258, 0.63907954, 0.47213111, 0.89872314]),
+        dims = 'time')
     x_grid = xr.DataArray([-0.9,0,0.2,0.5],
                           dims = 'z',
                           )
