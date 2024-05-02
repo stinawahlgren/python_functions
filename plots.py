@@ -10,7 +10,7 @@ from matplotlib.patches import Rectangle
 
 from .misc import get_edges
 
-def pcolormesh_offset(x,y,z,y_offset, x_pixel_scale = None, vmin = None, vmax = None, **kwargs):
+def pcolormesh_offset(x,y,z,y_offset, x_pixel_scale = None, vmin = None, vmax = None, ax = None,  **kwargs):
     """
     Example:
         Ny = 300
@@ -37,6 +37,9 @@ def pcolormesh_offset(x,y,z,y_offset, x_pixel_scale = None, vmin = None, vmax = 
     
     if vmax is None:
         vmax = np.nanmax(z)
+
+    if ax is None:
+        ax = plt.gca()
         
     # Deal with nan in offset
     nan_offset = np.isnan(y_offset)   
@@ -53,9 +56,9 @@ def pcolormesh_offset(x,y,z,y_offset, x_pixel_scale = None, vmin = None, vmax = 
             x_center = (x_edges[i]+x_edges[i+1])/2
             x_edge   = np.array([-0.5,0.5])* x_pixel_scale * x_step + x_center
             
-        plt.pcolormesh(x_edge, y_offset[i]+y_edges, z[:,i:i+1], vmin=vmin, vmax=vmax, **kwargs)
+        ax.pcolormesh(x_edge, y_offset[i]+y_edges, z[:,i:i+1], vmin=vmin, vmax=vmax, **kwargs)
       
-    plt.xlim(x_edges[0], x_edges[-1])
+    ax.set_xlim(x_edges[0], x_edges[-1])
 
 
 def pcolormesh_nongridded_y(x,y,z, x_pixel_scale = None, vmin = None, vmax = None, **kwargs):
