@@ -7,6 +7,8 @@ from matplotlib import colors
 import cmocean.cm as cmo
 from matplotlib.dates import DateFormatter, DayLocator, HourLocator, date2num
 from matplotlib.patches import Rectangle
+from matplotlib.cm import ScalarMappable
+from matplotlib.colors import Normalize
 
 from .misc import get_edges
 
@@ -286,5 +288,14 @@ def mark_range(range, axis='x', ax=None, color='lavender', zorder=-2, **kwargs):
 
     return
     
-    
+
+def make_colorbar(cmap, vmin, vmax, cax, **kwargs):
+    """
+    Make a colorbar in axis cax with specified cmap, vmin, vmax. 
+    """
+    norm = Normalize(vmin,vmax)
+    plt.colorbar(ScalarMappable(norm, cmap=cmap),
+                 cax=cax,
+                 **kwargs)
+    return
     
