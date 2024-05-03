@@ -257,6 +257,8 @@ def apply_median_filter(da, filter_lengths, filter_dims):
         for (N, fdim) in zip(filter_lengths, filter_dims):
             if dim == fdim:
                 kernel_size[i] = N
+    if max(kernel_size) == 1:
+        raise ValueError('No dimension to apply filter along!')
     
     # Create DataArray with filtered data
     filtered_da = da.copy()
