@@ -1,7 +1,8 @@
 import xarray as xr
 import numpy as np
 from scipy.stats import binned_statistic
-from scipy.ndimage import median_filter
+from scipy.ndimage import median_filter, generic_filter
+
 from matplotlib.pyplot import subplots
 
 from .misc import get_edges
@@ -264,4 +265,37 @@ def apply_median_filter(da, filter_lengths, filter_dims):
     filtered_da = da.copy()
     filtered_da.data = median_filter(da, kernel_size, mode='reflect')
     
+    return filtered_da
+
+
+def da_filter(da, filter_fun, filter_size, filter_dims, **kwargs):
+    """
+    Apply filter on data array using scipy.ndimage.generic_filter
+    
+    Parameters:
+        da : xarray.DataArray with data to be filtered
+        filter_fun : Function passed to generic_filter (e.g. np.nanmean)
+        filter_size : Size of filter along dimensions in filter_dims. ('size' in generic_filter)  (must be a list)
+        filter_dim : Dimensions along which filter will be applied (must be a list)
+        **kwargs : Keyword arguments passed to generic_filter
+        
+    Returns a new xr.DataArray with filtered data.
+
+    Example:
+    da_filter(da, np.nanmean, [9], ['time'])
+    da_filter(da, np.max, [9,21], ['time', 'range'], mode='wrap')
+    """
+    
+    # Expand kernel to same dimensions as da
+    kernel_size = [1 for dim in da.dims]
+    for (i,dim) in enumerate(da.dims):
+        for (N, fdim) in zip(filter_size, filter_dims):
+            if dim == fdim:
+                kernel_size[i] = N
+    if max(kernel_size) == 1:
+        raise ValueError('No dimension to apply filter along!')
+    
+    # Create DataArray with filtered data
+    filtered_da = da.copy()
+    filtered_da.data = generic_filter(da, filter_fun, size=kernel_size)
     return filtered_da
