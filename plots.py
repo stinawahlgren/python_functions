@@ -58,10 +58,10 @@ def pcolormesh_offset(x,y,z,y_offset, x_pixel_scale = None, vmin = None, vmax = 
             x_center = (x_edges[i]+x_edges[i+1])/2
             x_edge   = np.array([-0.5,0.5])* x_pixel_scale * x_step + x_center
             
-        ax.pcolormesh(x_edge, y_offset[i]+y_edges, z[:,i:i+1], vmin=vmin, vmax=vmax, **kwargs)
+        im = ax.pcolormesh(x_edge, y_offset[i]+y_edges, z[:,i:i+1], vmin=vmin, vmax=vmax, **kwargs)
       
     ax.set_xlim(x_edges[0], x_edges[-1])
-
+    return im
 
 def pcolormesh_nongridded_y(x,y,z, x_pixel_scale = None, vmin = None, vmax = None, **kwargs):
     """
