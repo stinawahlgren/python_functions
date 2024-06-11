@@ -287,6 +287,31 @@ def mark_range(range, axis='x', ax=None, color='lavender', zorder=-2, **kwargs):
     ax.add_patch(rect)
 
     return
+
+def mark_area(xlim, ylim, ax = None, scale=1, **kwargs):
+    """
+    Make a rectangle with extent xlim/ylim. The rectangle can be rescaled using the keyword 'scale' 
+    (center point doesn't change).
+
+    Example:
+    mark_area([-1e5, 6e4], [2.1e6, 2.4e6], scale = 2, zorder=10, 
+              transform=SouthPolarStereo(), 
+              color = 'deeppink', fill=False, linewidth=2)
+    """
+    
+    if ax is None:
+        ax=plt.gca()
+
+    # Rectangle dimensions
+    width = (xlim[1] - xlim[0])*scale
+    height = (ylim[1] - ylim[0])*scale
+    
+    # Anchor point
+    center = (np.mean(xlim), np.mean(ylim))
+    anchor = (center[0]-width/2,
+              center[1]-height/2)
+
+    ax.add_patch(Rectangle(anchor, width, height, **kwargs))
     
 
 def make_colorbar(cmap, vmin, vmax, cax, **kwargs):
