@@ -7,7 +7,7 @@ import matplotlib.ticker as mticker
 import numpy as np
 
 
-def plot_antarctica(land_color='slategray', iceshelf_color='lightsteelblue', max_latitude=-60, make_round=True):
+def plot_antarctica(land_color='slategray', iceshelf_color='lightsteelblue', max_latitude=-60, make_round=True, transparent_border = True):
     """
     Uses cartopy and Natural Earth to make a figure over Antarctica including ice shelves.
     """
@@ -35,6 +35,11 @@ def plot_antarctica(land_color='slategray', iceshelf_color='lightsteelblue', max
         verts = np.vstack([np.sin(theta), np.cos(theta)]).T
         circle = mpath.Path(verts * radius + center)
         ax.set_boundary(circle, transform=ax.transAxes)
+
+    if transparent_border:
+        # Make outside of plot transparent
+        plt.gcf().set_facecolor([0,0,0,0])
+        
 
     return ax
 
