@@ -2,6 +2,8 @@ from cartopy.feature import NaturalEarthFeature, LAND
 from cartopy.crs import PlateCarree, SouthPolarStereo
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
+import matplotlib.ticker as mticker
+
 import numpy as np
 
 
@@ -35,3 +37,38 @@ def plot_antarctica(land_color='slategray', iceshelf_color='lightsteelblue', max
         ax.set_boundary(circle, transform=ax.transAxes)
 
     return ax
+
+
+def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8):
+    """
+    Makes longitude/latitude ticks nice and small. Cartopys polar stereographic 
+    ticks are otherwise annoyingly large and weirdly rotated.
+
+    Based on https://stackoverflow.com/a/65382042
+    """
+
+    # Make gridlines
+    gl = ax.gridlines(draw_labels=True,x_inline=False,y_inline=False, crs=PlateCarree(), linewidth=0.5)
+
+    # Control tick gridline location
+    if longitudes is not None:
+        gl.xlocator = mticker.FixedLocator(longitudes)
+    if latitudes is not None:
+        gl.ylocator = mticker.FixedLocator(latitudes)
+
+    # Only show ticks on lower and left axes
+    gl.bottom_labels = True
+    gl.left_labels   = True
+    gl.top_labels    = False
+    gl.right_labels  = False
+
+    # Adjust rotation and size of tick labels
+    gl.xlabel_style['size']=size
+    gl.xlabel_style['rotation']=0
+    gl.xlabel_style['ha'] = 'center'
+    
+    gl.ylabel_style['size']=size
+    gl.ylabel_style['rotation']=90
+    gl.ylabel_style['ha'] = 'center'
+
+    return gl
