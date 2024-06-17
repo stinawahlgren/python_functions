@@ -79,7 +79,7 @@ def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8, linewidth
     return gl
 
 
-def scale_bar(ax, length=None, location=(0.5, 0.05), linewidth=3, fontsize=None, textoffset=0):
+def scale_bar(ax, length=None, location=(0.5, 0.05), linewidth=3, fontsize=None, textoffset=0, zorder=10):
     """
     Copied and slightly modified from: https://stackoverflow.com/a/35705477
     
@@ -124,10 +124,10 @@ def scale_bar(ax, length=None, location=(0.5, 0.05), linewidth=3, fontsize=None,
     ylim = ax.get_ylim()
     
     #Plot the scalebar
-    ax.plot(bar_xs, [sby, sby], transform=tmc, color='k', linewidth=linewidth)
+    ax.plot(bar_xs, [sby, sby], transform=tmc, color='k', linewidth=linewidth, zorder=zorder)
     #Plot the scalebar label
     text = ax.text(sbx + length * 500, sby+textoffset, str(length) + ' km', transform=tmc,
-                   horizontalalignment='center', verticalalignment='bottom')
+                   horizontalalignment='center', verticalalignment='bottom', zorder=zorder)
 
     # Restore original axis limits
     ax.set_xlim(xlim)
