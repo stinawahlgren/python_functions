@@ -44,7 +44,7 @@ def plot_antarctica(land_color='slategray', iceshelf_color='lightsteelblue', max
     return ax
 
 
-def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8):
+def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8, linewidth=0.5, color='lightgrey', **kwargs):
     """
     Makes longitude/latitude ticks nice and small. Cartopys polar stereographic 
     ticks are otherwise annoyingly large and weirdly rotated.
@@ -53,7 +53,7 @@ def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8):
     """
 
     # Make gridlines
-    gl = ax.gridlines(draw_labels=True,x_inline=False,y_inline=False, crs=PlateCarree(), linewidth=0.5)
+    gl = ax.gridlines(draw_labels=True,x_inline=False,y_inline=False, crs=PlateCarree(), linewidth=linewidth, color=color, **kwargs)
 
     # Control tick gridline location
     if longitudes is not None:
