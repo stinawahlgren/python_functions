@@ -117,11 +117,22 @@ def scale_bar(ax, length=None, location=(0.5, 0.05), linewidth=3, fontsize=None,
         length = scale_number(length) 
 
     #Generate the x coordinate for the ends of the scalebar
-    bar_xs = [sbx - length * 500, sbx + length * 500]
+    bar_xs = [sbx, sbx + length * 1000]
+
+    # Save xlim, ylim to later:
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+    
     #Plot the scalebar
     ax.plot(bar_xs, [sby, sby], transform=tmc, color='k', linewidth=linewidth)
     #Plot the scalebar label
-    text = ax.text(sbx, sby+textoffset, str(length) + ' km', transform=tmc,
+    text = ax.text(sbx + length * 500, sby+textoffset, str(length) + ' km', transform=tmc,
                    horizontalalignment='center', verticalalignment='bottom')
+
+    # Restore original axis limits
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    
+    # Set font size
     if fontsize is not None:
         text.set_size(fontsize)
