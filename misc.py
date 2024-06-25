@@ -7,6 +7,10 @@ def get_edges(centers):
     last  = centers[-1] + (centers[-1]-centers[-2])/2
     return np.concatenate([[first], mid, [last]])
 
+def get_centers(edges):
+    edges = np.array(edges)
+    centers = (edges[:-1]+edges[1:])/2
+    return centers
 
 def all_columns_equal(a):
     """
