@@ -7,13 +7,13 @@ import matplotlib.ticker as mticker
 import numpy as np
 
 
-def plot_antarctica(land_color='slategray', iceshelf_color='lightsteelblue', max_latitude=-60, make_round=True, transparent_border = True):
+def plot_antarctica(land_color='slategray', iceshelf_color='lightsteelblue', max_latitude=-60, make_round=True, central_longitude=0, transparent_border = True):
     """
     Uses cartopy and Natural Earth to make a figure over Antarctica including ice shelves.
     """
 
     # Make plot
-    ax = plt.axes(projection = SouthPolarStereo())
+    ax = plt.axes(projection = SouthPolarStereo(central_longitude=central_longitude))
     ax.set_extent([-180, 180, -90, max_latitude], PlateCarree())
     
     # Plot ice shelves
