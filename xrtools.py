@@ -1,6 +1,6 @@
 import xarray as xr
 import numpy as np
-from scipy.stats import binned_statistic
+from scipy.stats import binned_statistic, binned_statistic_2d
 from scipy.ndimage import median_filter, generic_filter
 
 from matplotlib.pyplot import subplots
@@ -52,6 +52,26 @@ def grid_data_1d(da_x, da_y, x_grid, label = None, statistics = ['mean', 'count'
 
     return xr.merge(ds_list)
 
+
+def grid_data_2d(x1, x2, f, dims, **kwargs):
+    """
+    Bin variable f(x1,x2) using scipy.stats.binned_statistics_2d. Binned data is returned as an xarray DataArray
+
+    Parameters:        
+        dims : List with name of dimensions, used when creating coordinates for the DataArray
+        **kwargs : Passed to scipy.stats.binned_statistics_2d, see doc for details
+        
+    Example:
+        x = np.random.rand(100)-0.5
+        y = 2*np.random.rand(100)-1
+        f = x**2+y**2
+        grid_data_2d(x, y, f, ['x','y'], statistic='median').plot()
+    """
+    data = binned_statistic_2d(x1, x2, f,**kwargs)
+    x1_center = (data.x_edge[:-1] + data.x_edge[1:])/2
+    x2_center = (data.y_edge[:-1] + data.y_edge[1:])/2
+
+    return xr.DataArray(data[0], coords = {dims[0] : x1_center, dims[1] : x2_center})
 
 def da_from_binned_statistic_1d(da_x, da_y, x_grid, statistic):
     """
