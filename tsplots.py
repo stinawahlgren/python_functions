@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from gsw import sigma0, CT_freezing
+from gsw import sigma0, CT_freezing, melting_ice_SA_CT_ratio
 
 def density_contour_lines(SA_lim, CT_lim, N = 10, N_SA = 100, N_CT = 100, colors = 'k', linewidths=0.5, **kwargs):
     """
@@ -32,6 +32,8 @@ def density_contour_lines(SA_lim, CT_lim, N = 10, N_SA = 100, N_CT = 100, colors
     # Plot  
     im = plt.contour(SA,CT,sigma, N, colors = colors, linewidths=linewidths, **kwargs)
     plt.gca().clabel(im, fontsize=10, inline=True)
+    plt.ylabel('Conservative temperature (°C)')
+    plt.xlabel('Absolute salinity (g/kg)')
     
 def freezing_line(SA_lim, p, N_SA = 30, saturation_fraction = 0, linestyle = 'dashed', color = 'k', **kwargs):
     """
@@ -50,7 +52,38 @@ def freezing_line(SA_lim, p, N_SA = 30, saturation_fraction = 0, linestyle = 'da
         freezing_line(plt.xlims(), 0)
     - With explicit limits:
         freezing_line([0, 35], 0)
-    """   
+    """
+    ylim = plt.ylim()
     SA = np.linspace(SA_lim[0], SA_lim[1], N_SA)
     freezing_line = CT_freezing(SA, p, saturation_fraction)
     plt.plot(SA, freezing_line, linestyle = linestyle, color = color,**kwargs)
+    plt.ylim(ylim)
+
+def plot_gade_line(SA_amb, CT_amb, p, t_ice, SA_min=None, **kwargs):
+
+    if SA_min is None:
+        SA_min = gade_freezing_line_intersect(SA_amb, CT_amb, p, t_ice)[0]
+       
+    dCT_dSA = 1/melting_ice_SA_CT_ratio(SA_amb, CT_amb, p, t_ice)
+    SA_gade = [SA_amb, SA_min]
+    CT_gade = [CT_amb, CT_amb + dCT_dSA*(SA_min-SA_amb)]
+    plt.plot(SA_gade, CT_gade, **kwargs)
+
+
+def gade_freezing_line_intersect(SA_amb, CT_amb, p, t_ice, saturation_fraction=0, SA_diff=-5):
+    """
+    Find where the Gade line crosses the freezing line. Freezing line is linearized
+    based on SA_amb and SA_amb + SA_diff
+    """
+
+    slope_gade = 1/melting_ice_SA_CT_ratio(SA_amb, CT_amb, p, t_ice)
+    intercept_gade = CT_amb - slope_gade * SA_amb
+    
+    freezing_line = CT_freezing([SA_amb, SA_amb + SA_diff], p, saturation_fraction)
+    slope_freezing = (freezing_line[1]-freezing_line[0])/SA_diff
+    intercept_freezing = freezing_line[0] - slope_freezing * SA_amb
+    
+    SA_intersect = (intercept_freezing - intercept_gade) / (slope_gade - slope_freezing)
+    CT_intersect = intercept_gade + slope_gade*SA_intersect
+
+    return(SA_intersect, CT_intersect)
