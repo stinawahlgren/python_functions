@@ -5,6 +5,46 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 
+def read_hugin_nav_postprocessed(mission_folder, version):
+    """
+    Reads position and attitude from postprocessed files 
+    
+    version = 'NBP22': data is taken from attitude_smooth.txt 
+                       and position_smooth.txt in {mission_folder}/post/
+    """
+
+    if version == 'NBP22':
+        # Read attitude data
+        attitude = pd.read_csv(Path(mission_folder).joinpath('post/attitude_smooth.txt'),
+                               sep = '\s+',
+                               usecols = [0,1,2,3],
+                               names = ['time', 'roll', 'pitch', 'heading' ])
+    
+        attitude['time'] = pd.to_datetime(attitude['time'], unit='s')
+    
+        # Read position data
+        position = pd.read_csv(Path(mission_folder).joinpath('post/position_smooth.txt'),
+                               sep = '\s+',
+                               usecols = [0,1,2,3],
+                               names = ['time', 'latitude', 'longitude', 'depth' ])
+        position['time'] = pd.to_datetime(position['time'], unit='s')
+    
+        # Make sure that files agree
+        assert_data_matching([attitude, position])
+    
+        # Combine to one dataframe
+        nav = pd.concat([attitude,
+                         position[['latitude', 'longitude', 'depth']]],
+                        axis=1)
+    else:
+        raise ValueError("Version not supported. Supported versions are: 'NBP22'")
+
+    # Convert from radians to degrees
+    for col in ['roll', 'pitch', 'heading', 'latitude', 'longitude']:
+        nav[col] = nav[col]*180/np.pi
+
+    return nav
+
 def read_hugin_nav(mission_folder):
     """
     Combine mutliple nav files from Ran to a pandas dataframe
@@ -86,6 +126,8 @@ def read_head(mission_folder):
                               'HD_PITCH'])
     df['time'] = pd.to_datetime(df['time'], unit='s')
     return df
+
+
 
 def read_depth(mission_folder):
     """
