@@ -137,7 +137,7 @@ def fancy_2d_hist(x,y, values, x_bins, y_bins, statistic = 'count',
     fig,axes = plt.subplots(2,3, width_ratios=width_ratios, height_ratios=height_ratios, figsize=figsize) 
     
     # 2D histogram:
-    stats2d =  binned_statistic_2d(x, y, values, statistic=statistic, bins=[x_bins, y_bins])
+    stats2d =  stats.binned_statistic_2d(x, y, values, statistic=statistic, bins=[x_bins, y_bins])
     # Replaces 0 in count with nan
     if statistic == 'count':
         stats2d.statistic[stats2d.statistic == 0] = np.nan
