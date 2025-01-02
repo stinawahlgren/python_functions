@@ -112,6 +112,66 @@ def nice_time_axis(ax=None):
     ax.xaxis.set_minor_formatter(DateFormatter("%H:%M"))
     ax.get_xaxis().set_tick_params(which='major', pad=10)
 
+def fancy_2d_hist(x,y, values, x_bins, y_bins, statistic = 'count', 
+                  figsize = (6,4), width_ratios = [1, 0.18, 0.05], height_ratios = [0.3,1], 
+                  histogram_color = 'slategray', xlabel = '', ylabel = '', 
+                  wspace = 0.05, hspace = 0.05,
+                  grid_kwargs = {'alpha' : 0.3}, **kwargs):
+    """
+    Makes a 2d histogram with 1d histograms on sides. 
+    x,y, values, x_bins, y_bins, statistic are passed directly to scipy.stats.binned_statistic_2d
+    (note that values are not used when statistic = 'count', so that can be set to anything then)
+
+    Third column in figure is for the colorbar.
+
+    wspace, hspace determines the width and height between subplots.
+
+    grid_kwargs are passed to plt.grid
+
+    **kwargs are passed to plt.pcolormesh (for plotting 2d histogram)
+
+    Returns (fig, axes)
+    """
+
+    # Make axes
+    fig,axes = plt.subplots(2,3, width_ratios=width_ratios, height_ratios=height_ratios, figsize=figsize) 
+    
+    # 2D histogram:
+    stats2d =  binned_statistic_2d(x, y, values, statistic=statistic, bins=[x_bins, y_bins])
+    # Replaces 0 in count with nan
+    if statistic == 'count':
+        stats2d.statistic[stats2d.statistic == 0] = np.nan
+    im = axes[1,0].pcolormesh(stats2d.x_edge, stats2d.y_edge, stats2d.statistic.T, **kwargs)
+    axes[1,0].set_xlabel(xlabel)
+    axes[1,0].set_ylabel(ylabel)
+
+    # 1D histogram x:
+    axes[0,0].hist(x, bins=stats2d.x_edge, color = histogram_color);
+    axes[0,0].set_ylabel('Count')
+    axes[0,0].set_xlim(stats2d.x_edge[[0,-1]])
+    axes[0,0].xaxis.set_ticklabels([])
+
+    # 1D histogram y:
+    axes[1,1].hist(y, bins=stats2d.y_edge, orientation='horizontal', color = histogram_color);
+    axes[1,1].set_xlabel('Count')
+    axes[1,1].set_ylim(stats2d.y_edge[[0,-1]])
+    axes[1,1].yaxis.set_ticklabels([])
+
+    # Add colorbar
+    fig.colorbar(im, cax=axes[1,2], label = statistic.capitalize())
+    
+    # Remove upper right axes
+    axes[0,1].set_axis_off()
+    axes[0,2].set_axis_off()
+
+    # Gridlines
+    axes[0,0].grid(**grid_kwargs)
+    axes[1,0].grid(**grid_kwargs)
+    axes[1,1].grid(**grid_kwargs)
+
+    fig.subplots_adjust(wspace=wspace, hspace=hspace)
+    return fig, axes
+
 def plot_twodstat(x,y,xbins=50,ybins=50,z=False,statistic="count",tickstep=False,axlines=(0,0),cmap = cmo.tempo, vmin=None, vmax=None, colorbar=True,meandot=True,meanline=False,axisequal=False, cbar_shrink = 1, norm=None, ax=None):
     """
     Compute and plot two a dimensional statistic. Copied from http://www.jmlilly.net/course/labs/html/VarianceEllipses-Python.html
