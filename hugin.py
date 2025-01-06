@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 
-def read_hugin_nav_postprocessed(mission_folder, version):
+def read_hugin_nav_postprocessed(mission_folder, version, suffix=None):
     """
     Reads position and attitude from postprocessed files 
     
@@ -15,7 +15,9 @@ def read_hugin_nav_postprocessed(mission_folder, version):
 
     if version == 'NBP22':
         # Read attitude data
-        attitude = pd.read_csv(Path(mission_folder).joinpath('post/attitude_smooth.txt'),
+        if suffix is None:
+            suffix = ''
+        attitude = pd.read_csv(Path(mission_folder).joinpath(f'post/attitude_smooth{suffix}.txt'),
                                sep = '\s+',
                                usecols = [0,1,2,3],
                                names = ['time', 'roll', 'pitch', 'heading' ])
@@ -23,7 +25,7 @@ def read_hugin_nav_postprocessed(mission_folder, version):
         attitude['time'] = pd.to_datetime(attitude['time'], unit='s')
     
         # Read position data
-        position = pd.read_csv(Path(mission_folder).joinpath('post/position_smooth.txt'),
+        position = pd.read_csv(Path(mission_folder).joinpath(f'post/position_smooth{suffix}.txt'),
                                sep = '\s+',
                                usecols = [0,1,2,3],
                                names = ['time', 'latitude', 'longitude', 'depth' ])
