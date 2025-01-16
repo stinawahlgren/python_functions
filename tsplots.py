@@ -35,7 +35,7 @@ def density_contour_lines(SA_lim, CT_lim, N = 10, N_SA = 100, N_CT = 100, colors
     plt.ylabel('Conservative temperature (°C)')
     plt.xlabel('Absolute salinity (g/kg)')
     
-def freezing_line(SA_lim, p, N_SA = 30, saturation_fraction = 0, linestyle = 'dashed', color = 'k', **kwargs):
+def freezing_line(SA_lim, p, N_SA = 30, saturation_fraction = 0,  fill_below = False, **plot_kwargs):
     """
     Mark freezing line in TS-plot (conservative temperature vs absolute salinity). The freezing point is calculated using the function CT_freezing from Gibbs See Water package.
     
@@ -56,7 +56,13 @@ def freezing_line(SA_lim, p, N_SA = 30, saturation_fraction = 0, linestyle = 'da
     ylim = plt.ylim()
     SA = np.linspace(SA_lim[0], SA_lim[1], N_SA)
     freezing_line = CT_freezing(SA, p, saturation_fraction)
-    plt.plot(SA, freezing_line, linestyle = linestyle, color = color,**kwargs)
+
+    if fill_below:
+        plt.gca().fill_between(SA, freezing_line, ylim[0]-1,  **plot_kwargs)
+    else:
+        kwargs  = {'linestyle' : 'dashed', 'color' : 'k'}
+        kwargs.update(plot_kwargs)
+        plt.plot(SA, freezing_line, **kwargs)
     plt.ylim(ylim)
 
 def plot_gade_line(SA_amb, CT_amb, p, t_ice, SA_min=None, **kwargs):
