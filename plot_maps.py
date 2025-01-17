@@ -46,7 +46,7 @@ def plot_antarctica(land_color='slategray', iceshelf_color='lightsteelblue', max
     return ax
 
 
-def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8, linewidth=0.5, color='lightgrey', **kwargs):
+def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8, linewidth=0.5, color='lightgrey', labels = ['bottom', 'left'], **kwargs):
     """
     Makes longitude/latitude ticks nice and small. Cartopys polar stereographic 
     ticks are otherwise annoyingly large and weirdly rotated.
@@ -63,11 +63,11 @@ def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8, linewidth
     if latitudes is not None:
         gl.ylocator = mticker.FixedLocator(latitudes)
 
-    # Only show ticks on lower and left axes
-    gl.bottom_labels = True
-    gl.left_labels   = True
-    gl.top_labels    = False
-    gl.right_labels  = False
+    # Only show ticks on specified axes
+    gl.bottom_labels = 'bottom' in labels
+    gl.left_labels   = 'left' in labels
+    gl.top_labels    = 'top' in labels
+    gl.right_labels  = 'right' in labels
 
     # Adjust rotation and size of tick labels
     gl.xlabel_style['size']=size
