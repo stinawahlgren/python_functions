@@ -183,9 +183,10 @@ def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'st
         yvals : The data on which the statistic will be computed (values in binned_statistic)
         centers : center of bins
         line :  statistic passed to binned_statistic (eg 'mean', 'median')
-        shade: 'std'/'95'/None
+        shade: 'std'/int/None
                 std : Shaded area is mean plus/minus one standard deviation
-                95  : Shaded area between 2.5th and 97.5th percentile
+                int : Shaded area cover int % of data. (Example 95 -> shaded 
+                      area between 2.5th and 97.5th percentile)
                 None: No shaded area
        min_nbr_of_points : minimum number of points ber bin 
        plt_kwargs : passed to matplotlib.plot
@@ -213,11 +214,11 @@ def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'st
         lower = line - std
         upper = line + std
     
-    if shade == '95':
+    if type(shade) == int:
         def percentile_lower(vals):
-                return np.percentile(vals, 2.5)
+                return np.percentile(vals, (100-shade)/2)
         def percentile_upper(vals):
-                return np.percentile(vals, 97.5)
+                return np.percentile(vals, (100+shade)/2)
         lower = binned_statistic(xvals, yvals, statistic = percentile_lower, bins = bin_edges).statistic
         upper = binned_statistic(xvals, yvals, statistic = percentile_upper, bins = bin_edges).statistic
         lower[~enough_points] = np.nan
