@@ -1,6 +1,6 @@
 import xarray as xr
 import numpy as np
-from scipy import stats    #Used for 2D binned statistics
+from scipy.stats import binned_statistic, binned_statistic_2d
 
 import matplotlib.pyplot as plt
 from matplotlib import colors
@@ -137,7 +137,7 @@ def fancy_2d_hist(x,y, values, x_bins, y_bins, statistic = 'count',
     fig,axes = plt.subplots(2,3, width_ratios=width_ratios, height_ratios=height_ratios, figsize=figsize) 
     
     # 2D histogram:
-    stats2d =  stats.binned_statistic_2d(x, y, values, statistic=statistic, bins=[x_bins, y_bins])
+    stats2d =  binned_statistic_2d(x, y, values, statistic=statistic, bins=[x_bins, y_bins])
     # Replaces 0 in count with nan
     if statistic == 'count':
         stats2d.statistic[stats2d.statistic == 0] = np.nan
@@ -171,6 +171,65 @@ def fancy_2d_hist(x,y, values, x_bins, y_bins, statistic = 'count',
 
     fig.subplots_adjust(wspace=wspace, hspace=hspace)
     return fig, axes
+
+def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'std', min_nbr_of_points = 10, **plot_kwargs):
+    """
+
+    Line plot based on scipy.stats.binned_statistic. Use for example to plot mean with shaded standard deviation.
+
+    Parameters:
+    
+        xvals : Values to be binned (x in binned_statistic)
+        yvals : The data on which the statistic will be computed (values in binned_statistic)
+        centers : center of bins
+        line :  statistic passed to binned_statistic (eg 'mean', 'median')
+        shade: 'std'/'95'/None
+                std : Shaded area is mean plus/minus one standard deviation
+                95  : Shaded area between 2.5th and 97.5th percentile
+                None: No shaded area
+       min_nbr_of_points : minimum number of points ber bin 
+       plt_kwargs : passed to matplotlib.plot
+
+    Example:
+
+    xvals = np.random.rand(100)
+    yvals = np.random.rand(100)*xvals
+    centers = np.linspace(0,1,10)
+    
+    binned_statistic_line_plot(xvals, yvals, centers, line='mean', shade='95', min_nbr_of_points=2)
+    """
+
+    bin_edges = get_edges(centers)
+    
+    nbr_of_points = binned_statistic(xvals, yvals, statistic = 'count', bins = bin_edges).statistic
+    enough_points = nbr_of_points >= min_nbr_of_points 
+    
+    line = binned_statistic(xvals, yvals, statistic = line, bins = bin_edges).statistic
+    line[~enough_points] = np.nan
+    
+    if shade == 'std':
+        mean  = binned_statistic(xvals, yvals, statistic = 'mean', bins = bin_edges).statistic
+        std   = binned_statistic(xvals, yvals, statistic = 'std', bins = bin_edges).statistic
+        lower = line - std
+        upper = line + std
+    
+    if shade == '95':
+        def percentile_lower(vals):
+                return np.percentile(vals, 2.5)
+        def percentile_upper(vals):
+                return np.percentile(vals, 97.5)
+        lower = binned_statistic(xvals, yvals, statistic = percentile_lower, bins = bin_edges).statistic
+        upper = binned_statistic(xvals, yvals, statistic = percentile_upper, bins = bin_edges).statistic
+        lower[~enough_points] = np.nan
+        upper[~enough_points] = np.nan
+    
+    # Plot
+    p = plt.plot(centers, line, **plot_kwargs)
+    color = p[0].get_color()
+    if shade is not None:
+        plt.fill_between(centers, lower, upper, alpha=0.5, facecolor = color)
+
+    return
 
 def plot_twodstat(x,y,xbins=50,ybins=50,z=False,statistic="count",tickstep=False,axlines=(0,0),cmap = cmo.tempo, vmin=None, vmax=None, colorbar=True,meandot=True,meanline=False,axisequal=False, cbar_shrink = 1, norm=None, ax=None):
     """
@@ -223,25 +282,25 @@ def plot_twodstat(x,y,xbins=50,ybins=50,z=False,statistic="count",tickstep=False
     
     #plot just one twodhist    
     if statistic=="count":
-        q = stats.binned_statistic_2d(x, y, None, bins=[xbins, ybins], statistic="count").statistic
+        q = binned_statistic_2d(x, y, None, bins=[xbins, ybins], statistic="count").statistic
         q[q==0]=np.nan  #swap zero values for NaNs, so they don't appear with a color
         clabel='Histogram'
     elif statistic=="log10count":
-        q = stats.binned_statistic_2d(x, y, None, bins=[xbins, ybins], statistic="count").statistic
+        q = binned_statistic_2d(x, y, None, bins=[xbins, ybins], statistic="count").statistic
         q[q==0]=np.nan  #swap zero values for NaNs, so they don't appear with a color
         q=np.log10(q)
         clabel='Log10 Histogram'
     elif statistic=="mean":    
-        q = stats.binned_statistic_2d(x, y, z, bins=[xbins, ybins], statistic="mean").statistic
+        q = binned_statistic_2d(x, y, z, bins=[xbins, ybins], statistic="mean").statistic
         clabel='Mean'
     elif statistic=="median":    
-        q = stats.binned_statistic_2d(x, y, z, bins=[xbins, ybins], statistic="median").statistic
+        q = binned_statistic_2d(x, y, z, bins=[xbins, ybins], statistic="median").statistic
         clabel='Median'
     elif statistic=="std":   
         #we are doing this ourselves because the algorithm used by binned_statistic_2d
         #is remarkably slow
         if np.all(np.isreal(z)): #real-valued case
-            q2    = stats.binned_statistic_2d(x, y, z**2, bins=[xbins, ybins], statistic="mean").statistic
+            q2    = binned_statistic_2d(x, y, z**2, bins=[xbins, ybins], statistic="mean").statistic
             qbar  = stats.binned_statistic_2d(x, y, z, bins=[xbins, ybins], statistic="mean").statistic
             q = np.sqrt(q2 - qbar**2)       
         else:  #complex-valued case
