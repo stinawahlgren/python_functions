@@ -115,7 +115,7 @@ def nice_time_axis(ax=None):
 def fancy_2d_hist(x,y, values, x_bins, y_bins, statistic = 'count', 
                   figsize = (6,4), width_ratios = [1, 0.18, 0.05], height_ratios = [0.3,1], 
                   histogram_color = 'slategray', xlabel = '', ylabel = '', 
-                  wspace = 0.05, hspace = 0.05,
+                  wspace = 0.05, hspace = 0.05, verbose = False,
                   grid_kwargs = {'alpha' : 0.3}, **kwargs):
     """
     Makes a 2d histogram with 1d histograms on sides. 
@@ -170,6 +170,14 @@ def fancy_2d_hist(x,y, values, x_bins, y_bins, statistic = 'count',
     axes[1,1].grid(**grid_kwargs)
 
     fig.subplots_adjust(wspace=wspace, hspace=hspace)
+
+    if verbose:
+        N_total = len(x)
+        inside_x_lims = (x >= stats2d.x_edge[0]) & (x <= stats2d.x_edge[-1])
+        inside_y_lims = (y >= stats2d.y_edge[0]) & (y <= stats2d.y_edge[-1])
+        N_shown = sum((inside_x_lims & inside_y_lims))
+        print(f'{N_total - N_shown} points not shown ({100*(N_total - N_shown)/N_total:.2e} %)')
+        
     return fig, axes
 
 def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'std', min_nbr_of_points = 10, **plot_kwargs):
