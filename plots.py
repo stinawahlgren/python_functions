@@ -193,7 +193,7 @@ def fancy_2d_hist(x,y, values, x_bins, y_bins, statistic = 'count', axes = None,
         
     return fig, axes
 
-def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'std', min_nbr_of_points = 10, **plot_kwargs):
+def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'std', min_nbr_of_points = 10, ax = None,  step = False, **plot_kwargs):
     """
 
     Line plot based on scipy.stats.binned_statistic. Use for example to plot mean with shaded standard deviation.
@@ -210,6 +210,7 @@ def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'st
                       area between 2.5th and 97.5th percentile)
                 None: No shaded area
        min_nbr_of_points : minimum number of points ber bin 
+       step : If true, plot line as a step plot
        plt_kwargs : passed to matplotlib.plot
 
     Example:
@@ -220,6 +221,8 @@ def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'st
     
     binned_statistic_line_plot(xvals, yvals, centers, line='mean', shade='95', min_nbr_of_points=2)
     """
+    if ax is None:
+        ax = plt.gca()
 
     bin_edges = get_edges(centers)
     
@@ -246,10 +249,14 @@ def binned_statistic_line_plot(xvals, yvals, centers, line = 'mean', shade = 'st
         upper[~enough_points] = np.nan
     
     # Plot
-    p = plt.plot(centers, line, **plot_kwargs)
+    if step:
+        p = step_plot(bin_edges, line, ax=ax, **plot_kwargs)
+    else:
+        p = ax.plot(centers, line, **plot_kwargs)
+        
     color = p[0].get_color()
     if shade is not None:
-        plt.fill_between(centers, lower, upper, alpha=0.5, facecolor = color)
+        ax.fill_between(centers, lower, upper, alpha=0.5, facecolor = color)
 
     return
 
@@ -453,6 +460,25 @@ def mark_area(xlim, ylim, ax = None, scale=1, **kwargs):
               center[1]-height/2)
 
     ax.add_patch(Rectangle(anchor, width, height, **kwargs))
+
+def step_plot(edges, values, label = '', ax = None, **kwargs):
+    
+    if len(edges) != (len(values)+1):
+        raise ValueError('edges should be one element longer than values')
+        
+    if ax == None:
+        ax = plt.gca()
+    
+    # Add label to first step
+    p = ax.plot(edges[0:2], [values[0], values[0]], label=label, **kwargs)
+    
+    # Plot rest without labels
+    color = p[0].get_color()
+    kwargs['c'] = color
+    for i in range(1,len(values)):
+        ax.plot(edges[i:i+2], [values[i], values[i]], label='', **kwargs)
+
+    return p
     
 
 def make_colorbar(cmap, vmin, vmax, cax, **kwargs):
