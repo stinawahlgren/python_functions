@@ -3,7 +3,9 @@ import numpy as np
 from scipy.stats import binned_statistic, binned_statistic_2d
 
 import matplotlib.pyplot as plt
+
 from matplotlib import colors
+import matplotlib.gridspec as gridspec
 import cmocean.cm as cmo
 from matplotlib.dates import DateFormatter, DayLocator, HourLocator, date2num
 from matplotlib.patches import Rectangle
