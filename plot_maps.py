@@ -72,7 +72,8 @@ def nice_lonlat_gridlines(ax, longitudes=None, latitudes=None, size=8, linewidth
     # Adjust rotation and size of tick labels
     gl.xlabel_style['size']=size
     gl.xlabel_style['rotation']=0
-    gl.xlabel_style['ha'] = 'center'
+    gl.xlabel_style['ha'] = 'center'   
+    gl.xlabel_style['va'] = 'center_baseline'
     
     gl.ylabel_style['size']=size
     gl.ylabel_style['rotation']=90
