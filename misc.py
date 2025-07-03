@@ -48,7 +48,7 @@ def dataset_metadata2latex_table(ds, type='variables'):
         if 'unit' in ds[var].attrs.keys():
             unit = ds[var].attrs['unit']
         else:
-            unit = ''
+            unit = '-'
 
         # fix line breaks in description
         description = ds[var].attrs["description"]
@@ -58,9 +58,12 @@ def dataset_metadata2latex_table(ds, type='variables'):
         # Remove '' from dimension
         dims = str(ds[var].dims).replace("'","")
 
+        # Remove () from dimension
+        dims = dims[1:-1]
+        
         # Remove traling , from dimension
-        if dims[-2] == ',':
-            dims = dims[:-2]+')'
+        if dims[-1] == ',':
+            dims = dims[:-1]
 
         # Replace _ with \_
         row = (f'{var} & {description} & {unit} & {dims}\\\\').replace('_', '\\_')
