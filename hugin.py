@@ -190,8 +190,8 @@ def read_vel(mission_folder):
 
     df = pd.read_csv(file,
                      sep = '\t',
-                     usecols = [0,1,2,3,4,5,6,7,8],
-                     names = ['time', 
+                     usecols = [i for i in range(19)] + [21],
+                     names = ['time',
                               'DVL_FA_BOTM_VEL',
                               'DVL_PS_BOTM_VEL',
                               'DVL_VERT_BOTM_VEL',
@@ -199,16 +199,30 @@ def read_vel(mission_folder):
                               'DVL_FA_WTR_VEL',
                               'DVL_PS_WTR_VEL',
                               'DVL_VERT_WTR_VEL',
-                              'DVL_ERR_WTR_VEL'])
+                              'DVL_ERR_WTR_VEL',
+                              'DVL_REF_LAY_START',
+                              'DVL_REF_LAY_END',
+                              'DVL_BM1_BOTM_TRK_QLTY',
+                              'DVL_BM2_BOTM_TRK_QLTY',
+                              'DVL_BM3_BOTM_TRK_QLTY',
+                              'DVL_BM4_BOTM_TRK_QLTY',
+                              'DVL_BM1_WTR_TRK_QLTY',
+                              'DVL_BM2_WTR_TRK_QLTY',
+                              'DVL_BM3_WTR_TRK_QLTY',
+                              'DVL_BM4_WTR_TRK_QLTY',
+                              'DVL_WTR_TRACK_MODE'])
     df['time'] = pd.to_datetime(df['time'], unit='s')
     
     # Replace 0 velocity with NaN
     vel_columns = ['DVL_FA_BOTM_VEL',
                    'DVL_PS_BOTM_VEL',
                    'DVL_VERT_BOTM_VEL',
+                   #'DVL_ERR_BOTM_VEL', #Error velocity seems to be zero everywhere?
                    'DVL_FA_WTR_VEL',
                    'DVL_PS_WTR_VEL',
-                   'DVL_VERT_WTR_VEL']
+                   'DVL_VERT_WTR_VEL',
+                   #'DVL_ERR_WTR_VEL',
+                   ]
 
     for col in vel_columns:
         df.loc[abs(df[col])<1e-9, col] = np.nan
