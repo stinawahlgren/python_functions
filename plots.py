@@ -500,4 +500,34 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
         cmap(np.linspace(minval, maxval, n)))
     return new_cmap
+
+def plot_linregress(result, verbose = True, xunit=None, yunit=None, **kwargs):
+    """
+    Plot result from scipy.stats.linregress
+    """
+    xlim = np.array(plt.gca().get_xlim())
+    plt.plot(xlim, result.intercept + result.slope*xlim, **kwargs)
+    plt.xlim(xlim)
+    if verbose:
+        print_linregress(result, xunit, yunit)
+    return
+
+def print_linregress(result, xunit=None, yunit=None):
+    """
+    Print result from scipy.stats.linregress
+    """
+    if yunit is None:
+        intercept_unit = ''
+        slope_unit = ''
+    else:
+        intercept_unit = yunit
+        if xunit is None:
+            slope_unit = ''
+        else:
+            slope_unit = f'({yunit})/({xunit})'
+    print('Linear regression result:')
+    print(f'\tintercept: {result.intercept:.2e} {intercept_unit}')
+    print(f'\tslope: {result.slope:.2e} {slope_unit}')
+    print(f'\trvalue: {result.rvalue:.2e}')
+    return
     
