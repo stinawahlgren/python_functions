@@ -188,7 +188,7 @@ def fancy_2d_hist(x,y, values, x_bins, y_bins, statistic = 'count', axes = None,
         N_total = len(x)
         inside_x_lims = (x >= stats2d.x_edge[0]) & (x <= stats2d.x_edge[-1])
         inside_y_lims = (y >= stats2d.y_edge[0]) & (y <= stats2d.y_edge[-1])
-        N_shown = sum((inside_x_lims & inside_y_lims))
+        N_shown = int(sum((inside_x_lims & inside_y_lims)))
         print(f'{N_total - N_shown} points not shown ({100*(N_total - N_shown)/N_total:.2e} %)')
         
     return fig, axes
