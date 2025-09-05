@@ -9,11 +9,12 @@ def read_hugin_nav_postprocessed(mission_folder, version, suffix=None):
     """
     Reads position and attitude from postprocessed files 
     
-    version = 'NBP22': data is taken from attitude_smooth.txt 
-                       and position_smooth.txt in {mission_folder}/post/
+    version = 'NBP22':   data is taken from attitude_smooth.txt 
+                         and position_smooth.txt in {mission_folder}/post/
+    version = 'ANA14B' : same as NBP22
     """
 
-    if version == 'NBP22':
+    if (version == 'NBP22') or (version == 'ANA14B'):
         # Read attitude data
         if suffix is None:
             suffix = ''
@@ -39,7 +40,7 @@ def read_hugin_nav_postprocessed(mission_folder, version, suffix=None):
                          position[['latitude', 'longitude', 'depth']]],
                         axis=1)
     else:
-        raise ValueError("Version not supported. Supported versions are: 'NBP22'")
+        raise ValueError("Version not supported. Supported versions are: 'NBP22', 'ANA14B'")
 
     # Convert from radians to degrees
     for col in ['roll', 'pitch', 'heading', 'latitude', 'longitude']:
