@@ -8,7 +8,7 @@ import scipy.signal as signal
 from xarray import DataArray
 from pandas import date_range
 
-def find_time_lag(t1, f1, t2, f2, time_step = 0.25, trim = 3600, interpolation_method = 'linear', verbose = False):
+def find_time_lag(t1, f1, t2, f2, time_step = 0.25, trim = 3600, interpolation_method = 'linear', verbose = False, f1_label = 'f1', f2_label = 'f2'):
     """
     Find the time lag between the two signals f1(t1) and f2(t2). The sign of the lag is
     so that removing the lag from t1 will result in synchronized signals.
@@ -24,6 +24,8 @@ def find_time_lag(t1, f1, t2, f2, time_step = 0.25, trim = 3600, interpolation_m
     tmin = np.max([t1[0], t2[0]])   + np.timedelta64(trim,'s')
     tmax = np.min([t1[-1], t2[-1]]) - np.timedelta64(trim,'s')
     time = date_range(start=tmin, end=tmax, freq=f'{time_step}s')
+    if len(time) < 3:
+        raise ValueError("Signals don't overlap, is trim too large?")
 
     # xarray deals well with time interpolation, so we make a DataArray first and interpolate that
     s1 = DataArray(data = f1, dims = 'time', coords = {'time' : t1})
@@ -39,28 +41,23 @@ def find_time_lag(t1, f1, t2, f2, time_step = 0.25, trim = 3600, interpolation_m
 
     if verbose:
         # Original signals
-        s1.plot(label = 'f1')
-        s2.plot(label = 'f2')
+        plt.figure(figsize=(8,2))
+        s1.plot(label = f1_label)
+        s2.plot(label = f2_label)
         plt.title('Original signals')
         plt.legend()
         plt.grid()
         plt.show()
 
         # Trimmed and interpolated signals
-        _plot_signals(s1_interp,s2_interp, 'Preprocessed signals')
+        _plot_signals(s1_interp,s2_interp, 'Preprocessed signals', s1_label=f1_label, s2_label = f2_label)
         
     # Find lag (in samples)
     lag__samples = detect_lag(s1_interp.values, s2_interp.values, verbose = verbose)
 
     # Convert lag to time unit
     lag = np.timedelta64(int(time_step*1e9), 'ns') * lag__samples
-
-    if verbose:
-        s1_corrected = s1_interp.copy()
-        s1_corrected['time'] = s1_corrected['time'] - lag
-        _plot_signals(s1_corrected, s2_interp, 'Lag compensated', s1_label='f1 corrected')
-
-        print(f'Detected time lag : {lag}')
+    print(f'Detected time lag : {lag}')
     
     return lag
 
@@ -78,7 +75,8 @@ def detect_lag(f1, f2, mode='same', verbose=False):
     
     detected_lag = lags[np.argmax(x)]
 
-    if verbose:     
+    if verbose: 
+        plt.figure(figsize=(8,2))
         plt.plot(lags,x)
         plt.title('cross-correlation')
         plt.xlabel('lag (samples)')
@@ -93,7 +91,7 @@ def _plot_signals(s1,s2, title, s1_label = 'f1', s2_label = 'f2'):
     N1 = len(s1.time.values)
     N2 = len(s2.time.values)
 
-    zoom = (min(N1,N2) > 4000)
+    zoom = (min(N1,N2) > 8000)
 
     if zoom:
         plt.figure(figsize=(8,3))
@@ -105,12 +103,13 @@ def _plot_signals(s1,s2, title, s1_label = 'f1', s2_label = 'f2'):
         plt.legend()
 
         plt.subplot(1,2,2)
-        index = slice(int(min(N1,N2)/4), int(min(N1,N2)/4) + 2000)
+        index = slice(int(min(N1,N2)/4), int(min(N1,N2)/4) + 4000)
         s1.isel(time=index).plot(label = s1_label)
         s2.isel(time=index).plot(label = s2_label)
         plt.grid()
         plt.title('zoomed')
         plt.legend()
+        plt.tight_layout()
         plt.show()
     else:
         s1.plot(label = s1_label)
