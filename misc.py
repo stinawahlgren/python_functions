@@ -1,4 +1,25 @@
 import numpy as np
+from glob import glob
+
+def list_of_files(filenames):
+    """
+    Returns a list of files matching the input
+
+    Example usage:
+    >>> list_of_files('path/to/files/*.csv')
+    ['path/to/files/file1.csv', 'path/to/files/file2.csv']
+    
+    >>> list_of_files(['path/to/files/*.csv', 'otherfile.txt'])
+    ['path/to/files/file1.csv', 'path/to/files/file2.csv', 'otherfile.txt']
+    """
+    if type(filenames) in (list,tuple):
+        file_list = []
+        for filename in filenames:
+            for f in glob(filename):
+                file_list.append(f)
+    else:
+        file_list = glob(filenames)
+    return file_list
 
 def get_edges(centers):
     centers = np.array(centers)
