@@ -247,7 +247,7 @@ def assert_data_matching(df_list):
             if max(df.time-df_list[0].time) > pd.Timedelta('0.001s'):
                 raise ValueError('Timestamps do not match')
 
-def add_AUV_nav(ADCP_ds, AUV_nav, debug_plots = False):
+def add_AUV_nav(ADCP_ds, AUV_nav, debug_plots = False, names=None):
     """
     Returns a new xarray dataset with interpolated data from AUV_nav
     
@@ -256,7 +256,9 @@ def add_AUV_nav(ADCP_ds, AUV_nav, debug_plots = False):
         AUV_nav : Pandas dataframe with navigation data from Ran
         debug_plots : Optional argument. If True, a lot of plots 
             for following the steps will be generated.
+        names : List with names of new variables (optional)
     """
+    
     # Convert timestamps to integers for easier interpolation
     # ADCP_time is converted to 1D
     time_variable = 'time'
@@ -308,8 +310,14 @@ def add_AUV_nav(ADCP_ds, AUV_nav, debug_plots = False):
             
     # Add new variables to ADCP dataset
     new_variables = {}
-    for key in interpolated_data.keys():
-        new_variables[key] = (ADCP_dims, interpolated_data[key].reshape(ADCP_shape,order='F'))
+
+    if names is None:
+        names = interpolated_data.keys()
+    if len(names) != len(interpolated_data.keys()):
+        raise ValueError("name list doesn't match with number of variables")
+    
+    for (name, key) in zip(names, interpolated_data.keys()):
+        new_variables[name] = (ADCP_dims, interpolated_data[key].reshape(ADCP_shape,order='F'))
 
     ADCP_ds = ADCP_ds.assign(new_variables)
 
@@ -319,7 +327,7 @@ def add_AUV_nav(ADCP_ds, AUV_nav, debug_plots = False):
         print('----------------------------------------------------------------')
         print('New varaibles in dataset:')
         print('----------------------------------------------------------------')
-        for key in interpolated_data.keys():
+        for key in names:
             ADCP_ds[key].plot()
             plt.show()
             
