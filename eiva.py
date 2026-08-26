@@ -14,11 +14,14 @@ def CTD_profile_for_depth_conversion(ctdfiles, savefile, bin_size = 1, p_min = 5
         Density (kg/m3)
         Salinity (pss78)
         Conducitvity (mS/cm)
-        Temperature (°C)
+        In-situ temperature (°C)
     Used for converting pressure to depth in Eivas software using TEOS-10 standard.
 
     Example:
-        CTD_profile_for_depth_conversion('data/CTD/*.txt', 'data/CTD_profile_for_Eiva.csv')
+        >>> CTD_profile_for_depth_conversion('data/CTD/*.txt', 'data/CTD_profile_for_Eiva.csv')
+
+        >>> CTD_profile_for_depth_conversion(['data/CTD/01.txt', 'data/CTD/03.txt'] , 'data/CTD_profile_for_Eiva.csv')
+
     """
 
     ctd_data = read_ctd_data(ctdfiles)
@@ -40,7 +43,7 @@ def CTD_profile_for_depth_conversion(ctdfiles, savefile, bin_size = 1, p_min = 5
                      'Density (kg/m3)': rho,
                      'Salinity (pss78)': SP,
                      'Conducitvity (mS/cm)':con,
-                     'Temperature (°C)':t
+                     'In-situ temperature (°C)':t
                     })
     
     # Replace nan with lineraly interpolated values
@@ -53,12 +56,11 @@ def CTD_profile_for_depth_conversion(ctdfiles, savefile, bin_size = 1, p_min = 5
     return
 
 
-def read_ctd_data(ctdfiles):
+def read_ctd_data(ctd_files):
     """
     Load provided csv-files as a pandas.DataFrame
     """
-    ctd_files = glob(ctdfiles)
-    ctd_data_list = [read_csv(f) for f in ctd_files]
+    ctd_data_list = [read_csv(f) for f in list_of_files(ctd_files)]
     return concat(ctd_data_list, axis=0, ignore_index = True)
     
 
@@ -84,3 +86,24 @@ def mean_profile(data, var, p, bins):
     values = res.statistic
     ps = (res.bin_edges[:-1] + res.bin_edges[1:])/2
     return (values, ps)
+
+
+def list_of_files(filenames):
+    """
+    Returns a list of files matching the input
+
+    Example usage:
+    >>> list_of_files('path/to/files/*.csv')
+    ['path/to/files/file1.csv', 'path/to/files/file2.csv']
+    
+    >>> list_of_files(['path/to/files/*.csv', 'otherfile.txt'])
+    ['path/to/files/file1.csv', 'path/to/files/file2.csv', 'otherfile.txt']
+    """
+    if type(filenames) in (list,tuple):
+        file_list = []
+        for filename in filenames:
+            for f in glob(filename):
+                file_list.append(f)
+    else:
+        file_list = glob(filenames)
+    return file_list
