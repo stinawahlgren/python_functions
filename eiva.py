@@ -15,12 +15,24 @@ def CTD_profile_for_depth_conversion(ctdfiles, savefile, bin_size = 1, p_min = 5
         Salinity (pss78)
         Conducitvity (mS/cm)
         In-situ temperature (°C)
-    Used for converting pressure to depth in Eivas software using TEOS-10 standard.
+    Used for converting pressure to depth in Eivas software using TEOS-10 standard. The profile is based on horizontally averaged CTD data from the specified files.
+
+    Parameters:
+        ctdfiles : input file(s)
+        savefile : name of created file
+        bin_size : resolution of the created profile (in dBar)
+        p_min    : minimum pressure of the created profile (in dBar)
+        SA       : name of absolute salinity-column in input files
+        CT       : name of conservative temperature-column in input files
+        p        : name of pressure-column in input files
+        lon      : name of longitude-column in input files
+        lat      : name of latitude-column in input files
+
 
     Example:
         >>> CTD_profile_for_depth_conversion('data/CTD/*.txt', 'data/CTD_profile_for_Eiva.csv')
 
-        >>> CTD_profile_for_depth_conversion(['data/CTD/01.txt', 'data/CTD/03.txt'] , 'data/CTD_profile_for_Eiva.csv')
+        >>> CTD_profile_for_depth_conversion(['data/CTD/01.txt', 'data/CTD/03.txt'] , 'data/CTD_profile_for_Eiva.csv', bin_size = 5)
 
     """
 
