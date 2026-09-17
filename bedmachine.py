@@ -5,7 +5,7 @@ from cartopy.crs import PlateCarree, SouthPolarStereo, Globe
 def read_bedmachine(path = '../../data/bedmachine/NSIDC-0756_BedMachineAntarctica_19700101-20191001_V04.1.nc'):
     return load_dataset(path)
 
-def plot_bedmachine(ds, var, limits, step=10, **kwargs):
+def plot_bedmachine(ds, var, limits, step=10, contour=False, mask = None, **kwargs):
     """
     Parameters:
         ds     : bedmachine data
@@ -33,9 +33,23 @@ def plot_bedmachine(ds, var, limits, step=10, **kwargs):
     xmax = np.max(boundary_xy[:,0]) + margin
     ymin = np.min(boundary_xy[:,1]) - margin
     ymax = np.max(boundary_xy[:,1]) + margin
-    
+
+    da = ds[var].sel(x=slice(xmin,xmax), y=slice(ymax,ymin)
+                    ).isel(x=slice(None,None,step), y=slice(None,None,step))
+
+    # Mask
+    if mask is not None:
+        da = da.where(
+            mask.sel(
+                x=slice(xmin,xmax), y=slice(ymax,ymin)
+                     ).isel(
+                         x=slice(None,None,step), y=slice(None,None,step)
+                     )
+            )
+                                
     # Plot
-    im = ds[var].sel(x=slice(xmin,xmax), y=slice(ymax,ymin)
-                    ).isel(x=slice(None,None,step), y=slice(None,None,step)
-                          ).plot(transform=proj_bedmachine, **kwargs)
+    if contour:
+        im = da.plot.contour(transform=proj_bedmachine, **kwargs)
+    else:
+        im = da.plot(transform=proj_bedmachine, **kwargs)
     return im
