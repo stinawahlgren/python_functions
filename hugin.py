@@ -116,15 +116,16 @@ def read_navpos(mission_folder):
             
 def read_head(mission_folder):
     """
-    Reads primary roll, pitch from head.txt in the given mission folder.
+    Reads primary heading, roll, pitch from head.txt in the given mission folder.
     """
     
     file = Path(mission_folder).joinpath('cp/Data/head.txt')
 
     df = pd.read_csv(file,
                      sep = '\t',
-                     usecols = [0, 2, 3],
+                     usecols = [0, 1, 2, 3],
                      names = ['time', 
+                              'HD_HEADING',
                               'HD_ROLL',
                               'HD_PITCH'])
     df['time'] = pd.to_datetime(df['time'], unit='s')
