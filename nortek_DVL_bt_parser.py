@@ -120,7 +120,7 @@ def checksum(bytes, cs):
         raise Exception("Checksum failed!")
 
 def remove_invalid_estimates(ds, var, value):
-    is_invalid = abs(ds[var] - value) < 1e-10
+    is_invalid = abs(ds[var] - value) < 1e-5
     ds[var] = ds[var].where(~is_invalid)
     return
 
