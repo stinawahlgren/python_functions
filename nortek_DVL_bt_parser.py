@@ -57,6 +57,7 @@ def read_dvl_bt(file):
     data = {
         'time' : ('time', time),
         'beam' : ('beam', [1, 2, 3, 4]),
+        'dvl'  : ('dvl', ['X', 'Y', 'Z1', 'Z2']),
         'bottom_track' : ('time', data_raw.id == int(b'0x1b',16)),
         'water_track'  : ('time', data_raw.id == int(b'0x1d',16)),
         'c_sound' : ('time', data_raw.soundspeed),
@@ -76,6 +77,14 @@ def read_dvl_bt(file):
                                                   data_raw.uncertaintyB2,
                                                   data_raw.uncertaintyB3, 
                                                   data_raw.uncertaintyB4])),
+        'vel2' : (('dvl', 'time'), array([data_raw.velX,
+                                          data_raw.velY,
+                                          data_raw.velZ1,
+                                          data_raw.velZ2])),
+        'vel2_uncertainty' : (('dvl', 'time'), array([data_raw.uncertaintyX, 
+                                                      data_raw.uncertaintyY,
+                                                      data_raw.uncertaintyZ1, 
+                                                      data_raw.uncertaintyZ2])),
     }
     
     attributes = {
@@ -218,7 +227,9 @@ bt_hdr = [
 
 value_invalid_estimate = {'vel' : -32.768,
                           'distance' : 0,
-                          'uncertainty' : 10
+                          'uncertainty' : 10,
+                          'vel2' : -32.768,
+                          'vel2_uncertainty' : 10,
                          }
 
 variable_attrs = {
