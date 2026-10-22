@@ -530,4 +530,20 @@ def print_linregress(result, xunit=None, yunit=None):
     print(f'\tslope: {result.slope:.2e} {slope_unit}')
     print(f'\trvalue: {result.rvalue:.2e}')
     return
-    
+
+def square_grid(ax=None):
+    """
+    Adjust aspect ratio, limits and ticks to make figure square.
+    """
+    if ax is None:
+        ax = plt.gca()
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+    lim = [min(xlim[0], ylim[0]), max(xlim[1], ylim[1])]
+    ax.set_xlim(lim)
+    ax.set_ylim(lim)
+    ax.set_yticks(ax.get_xticks())
+    ax.set_xlim(lim)
+    ax.set_ylim(lim)
+    ax.set_aspect('equal')
+    return
