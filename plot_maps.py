@@ -140,3 +140,22 @@ def scale_bar(ax, length=None, location=(0.5, 0.05), linewidth=3, fontsize=None,
     # Set font size
     if fontsize is not None:
         text.set_size(fontsize)
+
+def north_arrow(pos, len, ax=None, color = 'crimson', lw=2, textweigth='bold', textsize='large', **kwargs):
+    """
+    Plot an arrow pointing towards north
+
+    Parameters:
+        pos = (lon, lat) Position of arrow (end)
+        len = length of arrow (in latitude degrees)
+    """
+    
+    if ax is None:
+        ax = plt.gca()
+
+    ax.annotate("", xytext=pos, xy=(pos[0], pos[1]-len),
+                arrowprops=dict(arrowstyle="<-", lw=lw, color=color), 
+                transform=PlateCarree())
+    ax.annotate("N", xy=pos, color=color, 
+                weight=textweigth, size=textsize, transform=PlateCarree(),
+                horizontalalignment='right', verticalalignment='center')
