@@ -5,7 +5,7 @@ from cartopy.crs import PlateCarree, SouthPolarStereo, Globe
 def read_bedmachine(path = '../../data/bedmachine/NSIDC-0756_BedMachineAntarctica_19700101-20191001_V04.1.nc'):
     return load_dataset(path)
 
-def plot_bedmachine(ds, var, limits, step=10, contour=False, mask = None, **kwargs):
+def plot_bedmachine(ds, var, limits, step=10, scale=1,  contour=False, mask = None, **kwargs):
     """
     Parameters:
         ds     : bedmachine data
@@ -49,7 +49,7 @@ def plot_bedmachine(ds, var, limits, step=10, contour=False, mask = None, **kwar
                                 
     # Plot
     if contour:
-        im = da.plot.contour(transform=proj_bedmachine, **kwargs)
+        im = (da*scale).plot.contour(transform=proj_bedmachine, **kwargs)
     else:
-        im = da.plot(transform=proj_bedmachine, **kwargs)
+        im = (da*scale).plot(transform=proj_bedmachine, **kwargs)
     return im
