@@ -141,7 +141,9 @@ def scale_bar(ax, length=None, location=(0.5, 0.05), linewidth=3, fontsize=None,
     if fontsize is not None:
         text.set_size(fontsize)
 
-def north_arrow(pos, len, ax=None, color = 'crimson', lw=2, textweigth='bold', textsize='large', **kwargs):
+def north_arrow(pos, len, ax=None, color = 'crimson', lw=2,
+                textweigth='bold', textsize='large',
+                horizontalalignment='right', verticalalignment='center'):
     """
     Plot an arrow pointing towards north
 
@@ -158,4 +160,5 @@ def north_arrow(pos, len, ax=None, color = 'crimson', lw=2, textweigth='bold', t
                 transform=PlateCarree())
     ax.annotate("N", xy=pos, color=color, 
                 weight=textweigth, size=textsize, transform=PlateCarree(),
-                horizontalalignment='right', verticalalignment='center')
+                horizontalalignment=horizontalalignment,
+                verticalalignment=verticalalignment )
