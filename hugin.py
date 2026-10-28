@@ -12,12 +12,14 @@ def read_hugin_nav_postprocessed(mission_folder, version, suffix=None):
     version = 'NBP22':   data is taken from attitude_smooth.txt 
                          and position_smooth.txt in {mission_folder}/post/
     version = 'ANA14B' : same as NBP22
+    version = 'extended' : data is taken from navlab_smooth.txt
     """
+
+    if suffix is None:
+        suffix = ''
 
     if (version == 'NBP22') or (version == 'ANA14B'):
         # Read attitude data
-        if suffix is None:
-            suffix = ''
         attitude = pd.read_csv(Path(mission_folder).joinpath(f'post/attitude_smooth{suffix}.txt'),
                                sep = '\s+',
                                usecols = [0,1,2,3],
@@ -31,6 +33,17 @@ def read_hugin_nav_postprocessed(mission_folder, version, suffix=None):
                                usecols = [0,1,2,3],
                                names = ['time', 'latitude', 'longitude', 'depth' ])
         position['time'] = pd.to_datetime(position['time'], unit='s')
+
+        # Read velocity data
+        try:
+            velocity = pd.read_csv(Path(mission_folder).joinpath(f'post/velocity_smooth{suffix}.txt'),
+                                   sep = '\s+',
+                                   usecols = [0,1,2,3],
+                                   names = ['time', 'vel1', 'vel2', 'vel3' ])
+            velocity['time'] = pd.to_datetime(velocity['time'], unit='s')
+            assert_data_matching([attitude, velocity])
+        except:
+            velocity = None
     
         # Make sure that files agree
         assert_data_matching([attitude, position])
@@ -39,12 +52,30 @@ def read_hugin_nav_postprocessed(mission_folder, version, suffix=None):
         nav = pd.concat([attitude,
                          position[['latitude', 'longitude', 'depth']]],
                         axis=1)
+        if velocity is not None:
+            nav = pd.concat([nav,
+                             velocity[['vel1', 'vel2', 'vel3']]],
+                            axis=1)
+
+        # Convert from radians to degrees
+        for col in ['roll', 'pitch', 'heading', 'latitude', 'longitude']:
+            nav[col] = nav[col]*180/np.pi
+                     
+    elif version == 'extended':
+        # All data in the same txt-file
+        nav = pd.read_csv(Path(mission_folder).joinpath(f'post/navlab_smooth{suffix}.txt'),
+                          sep = '\s+',
+                          usecols = list(range(10)),
+                          names = ['time',
+                                   'latitude', 'longitude', 'depth',
+                                   'roll', 'pitch', 'heading',
+                                   'vel1', 'vel2', 'vel3'])
+        nav['time'] = pd.to_datetime(nav['time'], unit='s')
+        
     else:
         raise ValueError("Version not supported. Supported versions are: 'NBP22', 'ANA14B'")
 
-    # Convert from radians to degrees
-    for col in ['roll', 'pitch', 'heading', 'latitude', 'longitude']:
-        nav[col] = nav[col]*180/np.pi
+
 
     return nav
 
