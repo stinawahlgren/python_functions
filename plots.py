@@ -547,3 +547,12 @@ def square_grid(ax=None):
     ax.set_ylim(lim)
     ax.set_aspect('equal')
     return
+
+def reduce_xticks(ax=None, factor = 2):
+    """
+    Keep every factor:th xtick
+    """
+    if ax is None:
+        ax = plt.gca()
+    ticks = ax.get_xticks(minor=False)
+    ax.set_xticks(ticks[::(factor)])
