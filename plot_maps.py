@@ -1,5 +1,5 @@
 from cartopy.feature import NaturalEarthFeature, LAND
-from cartopy.crs import PlateCarree, SouthPolarStereo, TransverseMercator 
+from cartopy.crs import PlateCarree, SouthPolarStereo, TransverseMercator
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 import matplotlib.ticker as mticker
@@ -162,3 +162,24 @@ def north_arrow(pos, len, ax=None, color = 'crimson', lw=2,
                 weight=textweigth, size=textsize, transform=PlateCarree(),
                 horizontalalignment=horizontalalignment,
                 verticalalignment=verticalalignment )
+
+def map_quiver_plot_north_up(ax, lon, lat, u, v, **kwargs):
+    """
+    Quiver plots with cartopy projections seems a bit shaky, with arrows
+    pointing slightly wrong when not aligned with projections axes. This 
+    functions computes the angels explicitly and gives them as an argument
+    to quiver to ensure the directions are correct.
+    """
+    im = ax.quiver(lon, lat, u, v, 
+                   angles=quiver_plot_angles(u,v), 
+                   transform = PlateCarree(),
+                   **kwargs)
+    return im
+
+def quiver_plot_angles(u,v):
+    """
+    Computes the angle (relative to x-axis, counter clockwise)
+    given u (eastward velocity) and v (northward velocity) and
+    assuming north is along y-axis.
+    """
+    return np.rad2deg(np.arctan2(v,u))
