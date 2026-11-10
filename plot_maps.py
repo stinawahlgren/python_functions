@@ -170,7 +170,7 @@ def map_quiver_plot_north_up(ax, lon, lat, u, v, *args,  **kwargs):
     functions computes the angels explicitly and gives them as an argument
     to quiver to ensure the directions are correct.
     """
-    im = ax.quiver(lon, lat, u, v, 
+    im = ax.quiver(lon, lat, np.sqrt(u**2 + v**2), u*0, 
                    angles=quiver_plot_angles(u,v), 
                    transform = PlateCarree(),
                    *args, **kwargs)
