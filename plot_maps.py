@@ -163,7 +163,7 @@ def north_arrow(pos, len, ax=None, color = 'crimson', lw=2,
                 horizontalalignment=horizontalalignment,
                 verticalalignment=verticalalignment )
 
-def map_quiver_plot_north_up(ax, lon, lat, u, v, **kwargs):
+def map_quiver_plot_north_up(ax, lon, lat, u, v, *args,  **kwargs):
     """
     Quiver plots with cartopy projections seems a bit shaky, with arrows
     pointing slightly wrong when not aligned with projections axes. This 
@@ -173,7 +173,7 @@ def map_quiver_plot_north_up(ax, lon, lat, u, v, **kwargs):
     im = ax.quiver(lon, lat, u, v, 
                    angles=quiver_plot_angles(u,v), 
                    transform = PlateCarree(),
-                   **kwargs)
+                   *args, **kwargs)
     return im
 
 def quiver_plot_angles(u,v):
