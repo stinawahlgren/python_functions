@@ -2,6 +2,13 @@ from xarray import DataArray, dot, apply_ufunc
 from numpy import array, diag
 from scipy.spatial.transform import Rotation
 
+"""
+Calibration values from calib.ini
+"""
+dvl_up_calib_Ran = {'roll' : -0.1492,
+                    'pitch': -0.3491,
+                    'yaw'  : -0.4857}
+
 def auv2enu(ds, heading_var='auv_heading', pitch_var='auv_pitch', roll_var='auv_roll'):
     '''
     Computes the transformation matrix to go from the AUV frame ('fa', 'ps', 'vert'),
@@ -33,4 +40,46 @@ def auv2enu(ds, heading_var='auv_heading', pitch_var='auv_pitch', roll_var='auv_
         input_core_dims=[['time'], ['time'], ['time']],
         output_core_dims=[['time', 'earth', 'auv_ps_flipped']]
     )
-    return dot(T_rot, T_flip, dim='auv_ps_flipped')
+    return dot(T_rot, T_flip, dim='auv_ps_flipped'
+               ).assign_coords({'earth' : ['E', 'N', 'U'],
+                                'auv'   : ['fa', 'ps', 'vert']})
+
+
+def inst_adcp2inst_dvl_up():
+    """
+    Transformation matrix from the DVL ADCP coordinate system to the DVL 
+    bottom track coordinate system. This is a 135 degree rotation around 
+    the z-axis followed by flipping the direction of the y- and z-axis.
+    """
+    return  DataArray(diag([1,-1,-1]) @ Rotation.from_euler('z',-135, degrees=True).as_matrix(), 
+                         coords = {'dvl': ['X', 'Y', 'Z'], 
+                                   'adcp' : ['X', 'Y', 'Z']}
+                        ).rename('inst_adcp2inst_dvl')
+
+
+def inst_dvl_up2auv(expedition = 'ANA14B'):
+
+    if expedition in ['NBP22', 'ANA14B']:
+        calib = dvl_up_calib_Ran
+
+    return  DataArray(R_calib(calib) @ diag([1,-1,-1]),
+                          coords = {'auv' : ['fa', 'ps', 'vert'],
+                                    'dvl' : ['X', 'Y', 'Z']}
+                         ).rename('inst_dvl2auv')
+
+def inst_adcp2auv(expedition = 'ANA14B'):
+    
+    if expedition in ['NBP22', 'ANA14B']:
+        calib = dvl_up_calib_Ran
+        
+    return DataArray(R_calib(calib) @ Rotation.from_euler('z',-135, degrees=True).as_matrix(),
+                        coords = {'auv' : ['fa', 'ps', 'vert'],
+                                  'adcp' : ['X', 'Y', 'Z']}
+                        ).rename('inst_adcp2auv')
+
+def R_calib(calib):
+    return Rotation.from_euler('zyx',
+                               [calib['roll'],
+                                calib['pitch'],
+                                calib['yaw']],
+                               degrees=True).as_matrix()
